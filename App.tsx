@@ -1,117 +1,56 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+import React, {useRef, useState} from 'react';
+import {LayoutAnimation, Pressable, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {FlashList} from '@shopify/flash-list';
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [data, setData] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const list = useRef<FlashList<number> | null>(null);
+
+  const removeItem = (item: number) => {
+    setData(
+      data.filter(dataItem => {
+        return dataItem !== item;
+      }),
+    );
+    list.current?.prepareForLayoutAnimationRender();
+    // after removing the item, we start animation
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
+  const renderItem = ({item}: {item: number}) => {
+    const backgroundColor = item % 2 === 0 ? '#00a1f1' : '#ffbb00';
+    return (
+      <Pressable
+        onPress={() => removeItem(item)}>
         <View
           style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            ...styles.container,
+            backgroundColor: backgroundColor,
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+          <Text>Cell # {item}</Text>
         </View>
-      </ScrollView>
+      </Pressable>
+    );
+  };
+  return (
+    <SafeAreaView style={{flex: 1}}>
+      <FlashList
+        ref={list}
+        keyExtractor={item => item.toString()}
+        renderItem={renderItem}
+        estimatedItemSize={100}
+        data={data}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  container: {
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: 100,
   },
 });
 
