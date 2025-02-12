@@ -1,11 +1,10 @@
 import React, {useRef, useState} from 'react';
-import {LayoutAnimation, Pressable, SafeAreaView, StyleSheet, Text, View} from 'react-native';
-import {FlashList} from '@shopify/flash-list';
+import {FlatList, LayoutAnimation, Pressable, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 
 function App(): React.JSX.Element {
   const [data, setData] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
-  const list = useRef<FlashList<number> | null>(null);
+  const list = useRef<FlatList<number> | null>(null);
 
   const removeItem = (item: number) => {
     setData(
@@ -13,7 +12,6 @@ function App(): React.JSX.Element {
         return dataItem !== item;
       }),
     );
-    list.current?.prepareForLayoutAnimationRender();
     // after removing the item, we start animation
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
@@ -35,11 +33,10 @@ function App(): React.JSX.Element {
   };
   return (
     <SafeAreaView style={{flex: 1}}>
-      <FlashList
+      <FlatList
         ref={list}
         keyExtractor={item => item.toString()}
         renderItem={renderItem}
-        estimatedItemSize={100}
         data={data}
       />
     </SafeAreaView>
